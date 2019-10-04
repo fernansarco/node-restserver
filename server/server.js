@@ -1,5 +1,6 @@
 require('./config/config');
 const express = require('express')
+const mongoose = require('mongoose');
 const app = express()
 const bodyParser = require('body-parser')
 
@@ -8,40 +9,21 @@ app.use(bodyParser.urlencoded({ extended: false }))
     // parse application/json
 app.use(bodyParser.json())
 
-//get para consultar
-app.get('/usuario', function(req, res) {
-    res.json('get Usuario')
-})
+app.use(require('./routes/usuario'));
 
-//post para agregar datos
-app.post('/usuario', function(req, res) {
 
-    let body = req.body;
 
-    if (body.nombre === undefined) {
-        res.status(400).json({
-            ok: false,
-            mensaje: 'Se nececita el nombre de la persoan'
-        });
-    } else {
-        res.json({
-            persona: body
-        });
-    }
-})
+mongoose.connect(process.env.URLDB,
 
-//put para actualizar datos
-app.put('/usuario/:id', function(req, res) {
-    let id = req.params.id;
-    res.json({
-        id
-    })
-})
+    { useNewUrlParser: true, useCreateIndex: true },
+    (err, res) => {
 
-//put para actualizar el estado de los datos
-app.delete('/usuario', function(req, res) {
-    res.json('delete Usuario')
-})
+
+        if (err) throw new err;
+
+        console.log('Base de datos a arriba');
+
+    });
 
 app.listen(process.env.PORT, () => {
     console.log('Escuchando puerto', process.env.PORT);
