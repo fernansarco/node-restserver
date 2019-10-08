@@ -3,9 +3,13 @@ const app = express();
 const Usuario = require('../models/usuario');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
+const { verificaToken, verificaAdmin_Role } = require('../middlewares/autenticacion');
+
 
 //get para consultar
-app.get('/usuario', function(req, res) {
+app.get('/usuario', verificaToken, (req, res) => {
+
+
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -19,24 +23,17 @@ app.get('/usuario', function(req, res) {
         .exec((err, usuarios) => {
 
             if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    err
-                });
+                return res.status(400).json({ ok: false, err });
             }
 
             Usuario.count({ estado: true }, (err, conteo) => {
-                res.json({
-                    ok: true,
-                    usuarios,
-                    cuantos: conteo
-                });
+                res.json({ ok: true, usuarios, cuantos: conteo });
             });
         });
 });
 
 //post para agregar datos
-app.post('/usuario', function(req, res) {
+app.post('/usuario', [verificaToken, verificaAdmin_Role], function(req, res) {
     let body = req.body;
     let usuario = new Usuario({
         nombre: body.nombre,
@@ -46,23 +43,17 @@ app.post('/usuario', function(req, res) {
     });
     usuario.save((err, usuarioDB) => {
         if (err) {
-            return res.status(400).json({
-                ok: false,
-                err
-            })
+            return res.status(400).json({ ok: false, err })
         }
 
         //usuarioDB.password = null;
-        res.json({
-            ok: true,
-            usuario: usuarioDB
-        })
+        res.json({ ok: true, usuario: usuarioDB })
     });
 
 })
 
 //put para actualizar datos
-app.put('/usuario/:id', function(req, res) {
+app.put('/usuario/:id', [verificaToken, verificaAdmin_Role], function(req, res) {
     let id = req.params.id;
 
     //Solo envia los campos que quiero actualizar en el put
@@ -71,20 +62,14 @@ app.put('/usuario/:id', function(req, res) {
     Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
 
         if (err) {
-            return res.status(400).json({
-                ok: false,
-                err
-            });
+            return res.status(400).json({ ok: false, err });
         }
-        res.json({
-            ok: true,
-            usuario: usuarioDB
-        });
+        res.json({ ok: true, usuario: usuarioDB });
     })
 })
 
 //Delete para eliminar datos
-app.delete('/usuario/:id', function(req, res) {
+app.delete('/usuario/:id', [verificaToken, verificaAdmin_Role], function(req, res) {
 
     let id = req.params.id;
 
@@ -97,27 +82,13 @@ app.delete('/usuario/:id', function(req, res) {
     Usuario.findByIdAndUpdate(id, cambiaEstado, { new: true }, (err, usuarioBorrado) => {
 
         if (err) {
-            return res.status(400).json({
-                ok: false,
-                err
-            });
+            return res.status(400).json({ ok: false, err });
         };
 
         if (!usuarioBorrado) {
-            return res.status(400).json({
-                ok: false,
-                err: {
-                    message: 'El usuario esta inactivo'
-                }
-            });
-
-
+            return res.status(400).json({ ok: false, err: { message: 'El usuario esta inactivo' } });
         }
-        res.json({
-            ok: true,
-            usuario: usuarioBorrado
-
-        });
+        res.json({ ok: true, usuario: usuarioBorrado });
     });
 
 });
