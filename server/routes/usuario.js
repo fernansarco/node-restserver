@@ -5,11 +5,8 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const { verificaToken, verificaAdmin_Role } = require('../middlewares/autenticacion');
 
-
 //get para consultar
 app.get('/usuario', verificaToken, (req, res) => {
-
-
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -17,7 +14,7 @@ app.get('/usuario', verificaToken, (req, res) => {
     let limite = req.query.limite || 0;
     limite = Number(limite);
 
-    Usuario.find({ estado: true }, 'nombre email role estado google img')
+    Usuario.find({}, 'nombre precioUni descripcion categoria usuario disponible')
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {

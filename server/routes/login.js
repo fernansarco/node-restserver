@@ -14,18 +14,13 @@ app.post('/login', (req, res) => {
     Usuario.findOne({ email: body.email }, (err, usuarioDB) => {
 
         if (err) {
-            return res.status(500).json({
-                ok: false,
-                err
-            });
+            return res.status(500).json({ ok: false, err });
         }
 
         if (!usuarioDB) {
             return res.status(400).json({
                 ok: false,
-                err: {
-                    message: '(Usuario) o contraseña incorrectos'
-                }
+                err: { message: '(Usuario) o contraseña incorrectos' }
             });
         }
 
@@ -42,11 +37,7 @@ app.post('/login', (req, res) => {
             usuario: usuarioDB
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN })
 
-        res.json({
-            ok: true,
-            usuario: usuarioDB,
-            token
-        });
+        res.json({ ok: true, usuario: usuarioDB, token });
     })
 
 });
@@ -68,20 +59,14 @@ app.post('/google', async(req, res) => {
     let token = req.body.idtoken;
     let googleUser = await verify(token)
         .catch(e => {
-            return res.status(403).json({
-                ok: false,
-                err: e
-            });
+            return res.status(403).json({ ok: false, err: e });
         });
 
     Usuario.findOne({ email: googleUser.email }, (err, usuarioDB) => {
 
 
         if (err) {
-            return res.status(500).json({
-                ok: false,
-                err
-            });
+            return res.status(500).json({ ok: false, err });
         };
         if (usuarioDB) {
 
@@ -99,11 +84,7 @@ app.post('/google', async(req, res) => {
                     usuario: usuarioDB
                 }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
-                return res.json({
-                    ok: true,
-                    usuario: usuarioDB,
-                    token
-                });
+                return res.json({ ok: true, usuario: usuarioDB, token });
             }
         } else {
             //Si el usuario no existe en nuestra base de datos
@@ -118,23 +99,13 @@ app.post('/google', async(req, res) => {
             usuario.save((err, usuarioDB) => {
 
                 if (err) {
-                    return res.status(500).json({
-                        ok: false,
-                        err
-                    });
+                    return res.status(500).json({ ok: false, err });
                 };
-
-
                 let token = jwt.sign({
                     usuario: usuarioDB
                 }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
-                return res.json({
-                    ok: true,
-                    usuario: usuarioDB,
-                    token,
-
-                });
+                return res.json({ ok: true, usuario: usuarioDB, token, });
 
             });
         }
